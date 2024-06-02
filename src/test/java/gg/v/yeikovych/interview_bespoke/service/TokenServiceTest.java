@@ -82,4 +82,16 @@ public class TokenServiceTest {
 
         assertThat(tokenService.hasValidTokenForId(idWithToken)).isFalse();
     }
+
+    @Test
+    public void shouldReturnTheSameTokenIdForTheSameUserIfTokenIsNotExpired() {
+        IdHolder idWithToken = new IdHolder("a");
+
+        Token token1 = tokenService.assignOrGetToken(idWithToken);
+        Token token2 = tokenService.assignOrGetToken(idWithToken);
+
+        assertThat(token1.isExpired()).isFalse();
+        assertThat(token2.isExpired()).isFalse();
+        assertThat(token1).isEqualTo(token2);
+    }
 }
