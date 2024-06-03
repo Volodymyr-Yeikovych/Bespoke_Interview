@@ -22,10 +22,10 @@ public class BespokeInterviewApplication {
         SpringApplication.run(BespokeInterviewApplication.class, args);
     }
 
-    @Bean
-    public CommandLineRunner run() {
-        tokenService.generateTokens();
-        return args -> {
-        };
-    }
+//    @Bean
+//    public CommandLineRunner run() {
+//        tokenService.init();
+//        return args -> {
+//        };
+//    }
 }

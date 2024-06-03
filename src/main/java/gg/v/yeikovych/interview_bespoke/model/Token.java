@@ -9,12 +9,14 @@ public class Token {
     private LocalDateTime timeIssued;
     private LocalDateTime timeExpires;
 
-    public String getContent() {
-        return content;
+    public Token(String content, LocalDateTime timeIssued, LocalDateTime timeExpires) {
+        this.content = content;
+        this.timeIssued = timeIssued;
+        this.timeExpires = timeExpires;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public String getContent() {
+        return content;
     }
 
     public LocalDateTime getTimeIssued() {

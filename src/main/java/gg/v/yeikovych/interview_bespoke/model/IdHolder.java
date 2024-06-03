@@ -6,7 +6,6 @@ public class IdHolder {
 
     private String userId;
 
-
     public String getUserId() {
         return userId;
     }
@@ -15,9 +14,6 @@ public class IdHolder {
         this.userId = userId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 
     @Override
     public String toString() {

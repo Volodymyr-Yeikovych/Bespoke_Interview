@@ -1,10 +1,10 @@
 package gg.v.yeikovych.interview_bespoke.controller;
 
-import gg.v.yeikovych.interview_bespoke.exception.NoTokenAvailableException;
+import gg.v.yeikovych.interview_bespoke.model.IdHolder;
 import gg.v.yeikovych.interview_bespoke.model.Token;
-import gg.v.yeikovych.interview_bespoke.service.ParsingService;
 import gg.v.yeikovych.interview_bespoke.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,39 +13,47 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/bespoke")
+@RequestMapping("/api/tokens/")
 public class ApiController {
 
     private final TokenService tokenService;
-    private final ParsingService parsingService;
-
     @Autowired
-    public ApiController(TokenService tokenService, ParsingService parsingService) {
+    public ApiController(TokenService tokenService) {
         this.tokenService = tokenService;
-        this.parsingService = parsingService;
     }
 
-    @GetMapping("/new/{id}")
-    public ResponseEntity<String> getTokenFromApi(@PathVariable String id) {
-        var parsedId = parsingService.parseId(id);
+    @GetMapping("/{userId}")
+    public ResponseEntity<String> getTokenFromApi(@PathVariable String userId) {
+        IdHolder parsedId = new IdHolder(userId);
 
         Token token;
         try {
             token = tokenService.assignOrGetToken(parsedId);
-        } catch (NoTokenAvailableException e) {
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("429");
+        } catch (IllegalStateException e) {
+            return ResponseEntity
+                    .status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body("No Tokens available for the given moment.");
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(token.getContent());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_TYPE, "text/plain")
+                .body(token.getContent());
     }
 
-    @GetMapping("/exists/{id}")
-    public ResponseEntity<String> checkIfExists(@PathVariable String id) {
-        var parsedId = parsingService.parseId(id);
+    @GetMapping("/{userId}/{tokenId}")
+    public ResponseEntity<String> checkIfExists(@PathVariable String userId, @PathVariable String tokenId) {
+        IdHolder parsedId = new IdHolder(userId);
 
-        var hasValidToken = tokenService.hasValidTokenForId(parsedId);
+        boolean hasValidToken = tokenService.hasTokenForId(parsedId, tokenId);
 
-        if (!hasValidToken) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false+"");
-        return ResponseEntity.status(HttpStatus.OK).body(true+"");
+        if (!hasValidToken)
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Token {" + tokenId + "} for UserId {" + userId + "} was not found.");
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Token {" + tokenId + "} exists for UserId {" + userId + "}, and is valid.");
     }
 }
